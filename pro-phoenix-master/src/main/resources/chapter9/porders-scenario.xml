@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<datamodel name="orders">
+    <datamapping>
+        <column>
+            <!-- This column type defines what will generally happen to VARCHAR fields unless they are explicitly defined or overridden elsewhere -->
+            <name>GENERAL_VARCHAR</name>
+            <type>VARCHAR</type>
+            <dataSequence>RANDOM</dataSequence>
+            <length>10</length>
+        </column>
+        <column>
+            <name>GENERAL_CHAR</name>
+            <type>CHAR</type>
+            <dataSequence>SEQUENTIAL</dataSequence>
+            <length>15</length>     
+        </column>
+        <column>
+            <type>DATE</type>
+            <!--SEQUENTIAL is unsupported for DATE -->
+            <dataSequence>RANDOM</dataSequence>
+            <!-- Number [0-100] that represents the probability of creating a null value -->
+            <!-- The higher the number, the more like the value will returned will be null -->
+            <!-- Leaving this tag out is equivalent to having a 0 probability. i.e. never null -->
+            <nullChance>0</nullChance>
+            <minValue>1975</minValue>
+            <maxValue>2025</maxValue>
+            <name>GENERAL_DATE</name>
+        </column>
+        <column>
+            <type>DATE</type>
+            <!--SEQUENTIAL is unsupported for DATE -->
+            <dataSequence>RANDOM</dataSequence>
+            <!-- Number [0-100] that represents the probability of creating a null value -->
+            <!-- The higher the number, the more like the value will returned will be null -->
+            <!-- Leaving this tag out is equivalent to having a 0 probability. i.e. never null -->
+            <nullChance>0</nullChance>
+            <useCurrentDate>true</useCurrentDate>
+            <name>NOW_DATE</name>
+        </column>
+        <column>
+            <type>DECIMAL</type>
+            <dataSequence>RANDOM</dataSequence>
+            <minValue>0</minValue>
+            <maxValue>1</maxValue>
+
+            <!-- Precision is limited to 18 -->
+            <precision>18</precision>
+            <!-- Number [0-100] that represents the probability of creating a null value -->
+            <!-- The higher the number, the more like the value will returned will be null -->
+            <!-- Leaving this tag out is equivalent to having a 0 probability. i.e. never null -->
+            <nullChance>10</nullChance>
+            <name>GENERAL_DECIMAL</name>
+        </column>
+        <column>
+            <name>GENERAL_INTEGER</name>
+            <type>INTEGER</type>
+            <dataSequence>RANDOM</dataSequence>
+            <minValue>1</minValue>
+            <maxValue>999999</maxValue>
+            <!-- Number [0-100] that represents the probability of creating a null value -->
+            <!-- The higher the number, the more like the value will returned will be null -->
+            <!-- Leaving this tag out is equivalent to having a 0 probability. i.e. never null -->
+            <nullChance>0</nullChance>          
+        </column>
+        <column>
+            <type>DATE</type>
+            <name>CREATED_DATE</name>
+            <minValue>2000</minValue>
+            <maxValue>2015</maxValue>
+            <valuelist>
+                <!-- Distributes randomly with equal chance of being picked -->
+                <datavalue distribution="80">
+                    <!-- Joda time format: yyyy-MM-dd HH:mm:ss.SSS ZZZ -->
+                    <minValue>2016-09-15 00:01:00.000</minValue>
+                    <maxValue>2016-09-15 11:00:00.000</maxValue>
+                </datavalue>
+                <datavalue distribution="10">
+                    <value>2016-11-04 00:01:00.000</value>
+                </datavalue>
+                <datavalue distribution="10">
+                    <minValue>2016-12-25 00:01:00.000</minValue>
+                    <maxValue>2016-12-31 00:01:00.300</maxValue>
+                </datavalue>
+            </valuelist>
+        </column>
+        <column>
+            <type>CHAR</type>
+            <userDefined>true</userDefined>
+            <dataSequence>LIST</dataSequence>
+            <length>15</length>
+            <name>PARENT_ID</name>
+            <valuelist>
+                <!-- Distributes according to specified values. These must total 100 -->
+                <datavalue distribution="60">
+                    <value>aAAyYhnNbBs9kWk</value>
+                </datavalue>
+                <datavalue distribution="20">
+                    <value>bBByYhnNbBs9kWu</value>
+                </datavalue>
+                <datavalue distribution="20">
+                    <value>cCCyYhnNbBs9kWr</value>
+                </datavalue>
+            </valuelist>
+        </column>
+        <column>
+            <name>PREFX_STRING</name>
+            <type>VARCHAR</type>
+            <length>10</length>
+            <userDefined>true</userDefined>
+            <dataSequence>RANDOM</dataSequence>
+            <prefix>MYPRFX</prefix>
+        </column>
+    </datamapping>
+
+    <scenarios>
+        <scenario tableName="PORDERS" rowCount="1000" name="perf_read_writes">
+          
+            <!--
+                This is used to add mixed R/W workloads.
+
+                If this tag exists, a writer pool will be created based on the below properties.
+                These props will override the default values in pherf.properties, but only for this
+                scenario.The write jobs will run in conjunction with the querySet below.
+            -->
+            <writeParams executionDurationInMs="10000">
+                 <writerThreadCount>10</writerThreadCount>
+
+                <!--
+                    Throttles the writers with a small sleep durations between writes.
+                -->
+                <threadSleepDuration>10</threadSleepDuration>
+                <batchSize>1000</batchSize>
+            </writeParams>
+            <querySet concurrency="1" executionType="PARALLEL" executionDurationInMs="10000">
+                <query id="q1" statement="select count(*) from PORDERS"/>
+                <query id="q2" statement="select sum(QUANTITY) from PORDERS"/>
+            </querySet>
+
+        </scenario>
+    </scenarios>
+</datamodel>
+
